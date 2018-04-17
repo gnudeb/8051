@@ -13,6 +13,7 @@ class Operand(Enum):
     ACCUMULATOR = 5
     INDIRECT = 6
     REGISTER = 7
+    OFFSET = 8
 
 
 class Command:
@@ -31,12 +32,15 @@ _commands = [
     Command("00000000", "nop"),
     Command("...00001", "ajmp", Operand.ADDR11),
     Command("00000010", "ljmp", Operand.ADDR16),
-    Command("00000011", "rr",   Operand.ACCUMULATOR),
-    Command("00000100", "inc",  Operand.ACCUMULATOR),
-    Command("00000101", "inc",  Operand.DIRECT),
-    Command("0000011.", "inc",  Operand.INDIRECT),
-    Command("00001...", "inc",  Operand.REGISTER),
-    Command("00010000", "jbc",  Operand.BIT)
+    Command("00000011", "rr", Operand.ACCUMULATOR),
+    Command("00000100", "inc", Operand.ACCUMULATOR),
+    Command("00000101", "inc", Operand.DIRECT),
+    Command("0000011.", "inc", Operand.INDIRECT),
+    Command("00001...", "inc", Operand.REGISTER),
+    Command("00010000", "jbc", Operand.BIT, Operand.OFFSET),
+    Command("...10001", "acall", Operand.ADDR11),
+    Command("...10010", "lcall", Operand.ADDR16),
+    Command("00010011", "rrc", Operand.ACCUMULATOR),
 ]
 
 
@@ -70,7 +74,8 @@ class Intel8051StateMachine:
             address += self.next_byte()
             self.tokens.append(tokens.Addr16Token(address))
         elif operand == Operand.REGISTER:
-            pass
+            register = self.current_opcode & 0b00000111
+            self.tokens.append(tokens.RegisterToken(register))
 
     def listing(self):
         return ' '.join(map(str, self.tokens))

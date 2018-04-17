@@ -22,3 +22,8 @@ class Addr16Token(Token):
 class EndOfInstrToken(Token):
     def __init__(self):
         super().__init__("\n")
+
+
+class RegisterToken(Token):
+    def __str__(self):
+        return "r{}".format(self.value)
