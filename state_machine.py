@@ -1,19 +1,6 @@
-from enum import Enum
 import re
 
 import tokens
-
-
-class Operand(Enum):
-    IMMEDIATE = 0
-    DIRECT = 1
-    ADDR11 = 2
-    ADDR16 = 3
-    BIT = 4
-    ACCUMULATOR = 5
-    INDIRECT = 6
-    REGISTER = 7
-    OFFSET = 8
 
 
 class Command:
@@ -30,17 +17,17 @@ class Command:
 
 _commands = [
     Command("00000000", "nop"),
-    Command("...00001", "ajmp", Operand.ADDR11),
-    Command("00000010", "ljmp", Operand.ADDR16),
-    Command("00000011", "rr", Operand.ACCUMULATOR),
-    Command("00000100", "inc", Operand.ACCUMULATOR),
-    Command("00000101", "inc", Operand.DIRECT),
-    Command("0000011.", "inc", Operand.INDIRECT),
-    Command("00001...", "inc", Operand.REGISTER),
-    Command("00010000", "jbc", Operand.BIT, Operand.OFFSET),
-    Command("...10001", "acall", Operand.ADDR11),
-    Command("...10010", "lcall", Operand.ADDR16),
-    Command("00010011", "rrc", Operand.ACCUMULATOR),
+    Command("...00001", "ajmp", "addr11"),
+    Command("00000010", "ljmp", "addr16"),
+    Command("00000011", "rr", "a"),
+    Command("00000100", "inc", "a"),
+    Command("00000101", "inc", "direct"),
+    Command("0000011.", "inc", "indirect"),
+    Command("00001...", "inc", "register"),
+    Command("00010000", "jbc", "bit", "offset"),
+    Command("...10001", "acall", "addr11"),
+    Command("...10010", "lcall", "addr16"),
+    Command("00010011", "rrc", "a"),
 ]
 
 
@@ -64,16 +51,16 @@ class Intel8051StateMachine:
 
         self.tokens.append(tokens.EndOfInstrToken())
 
-    def consume_operand(self, operand: Operand):
-        if operand == Operand.ADDR11:
+    def consume_operand(self, operand):
+        if operand == "addr11":
             address = (self.current_opcode & 0b11100000) << 3
             address += self.next_byte()
             self.tokens.append(tokens.Addr11Token(address))
-        elif operand == Operand.ADDR16:
+        elif operand == "addr16":
             address = self.next_byte() << 8
             address += self.next_byte()
             self.tokens.append(tokens.Addr16Token(address))
-        elif operand == Operand.REGISTER:
+        elif operand == "register":
             register = self.current_opcode & 0b00000111
             self.tokens.append(tokens.RegisterToken(register))
 
