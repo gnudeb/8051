@@ -1,6 +1,14 @@
 
+def token(terminal, value=None):
+    for child in Token.__subclasses__():
+        if child.terminal == terminal:
+            return child(value)
+
+
 class Token:
-    def __init__(self, value):
+    terminal = None
+
+    def __init__(self, value=None):
         self.value = value
 
     def __str__(self):
@@ -8,22 +16,30 @@ class Token:
 
 
 class OpcodeToken(Token):
-    pass
+    terminal = "opcode"
 
 
 class Addr11Token(Token):
-    pass
+    terminal = "addr11"
 
 
 class Addr16Token(Token):
-    pass
+    terminal = "addr16"
 
 
 class EndOfInstrToken(Token):
-    def __init__(self):
-        super().__init__("\n")
+    terminal = "eoi"
+
+    def __str__(self):
+        return "\n"
 
 
 class RegisterToken(Token):
+    terminal = "register"
+
     def __str__(self):
         return "r{}".format(self.value)
+
+
+class AccumulatorToken(Token):
+    terminal = "a"

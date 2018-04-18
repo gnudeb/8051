@@ -1,6 +1,7 @@
+from collections import namedtuple
 import re
 
-import tokens
+from tokens import token
 
 
 class Command:
@@ -44,28 +45,40 @@ class Intel8051StateMachine:
     def consume_command(self):
         opcode = self.current_opcode = self.next_byte()
         command = self.get_matching_command(opcode)
-        self.tokens.append(tokens.OpcodeToken(command.mnemonic))
+        self.tokens.append(token("opcode", command.mnemonic))
 
         for operand in command.operands:
             self.consume_operand(operand)
 
-        self.tokens.append(tokens.EndOfInstrToken())
+        self.tokens.append(token("eoi"))
 
     def consume_operand(self, operand):
         if operand == "addr11":
             address = (self.current_opcode & 0b11100000) << 3
             address += self.next_byte()
-            self.tokens.append(tokens.Addr11Token(address))
+            value = address
         elif operand == "addr16":
             address = self.next_byte() << 8
             address += self.next_byte()
-            self.tokens.append(tokens.Addr16Token(address))
+            value = address
         elif operand == "register":
             register = self.current_opcode & 0b00000111
-            self.tokens.append(tokens.RegisterToken(register))
+            value = register
+        elif operand == "a":
+            value = "a"
+        else:
+            raise Exception("Unknown operand {}".format(operand))
+        self.tokens.append(token(operand, value))
 
     def listing(self):
-        return ' '.join(map(str, self.tokens))
+        return ''.join(self.iterate_token_values())
+
+    def iterate_token_values(self):
+        for token in self.tokens:
+            if token.terminal is "opcode":
+                yield str(token).ljust(8)
+            else:
+                yield str(token)
 
     def get_matching_command(self, opcode):
         for command in self.commands:
