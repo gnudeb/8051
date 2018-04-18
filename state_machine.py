@@ -85,11 +85,16 @@ class Intel8051StateMachine:
         return ''.join(self.iterate_token_values())
 
     def iterate_token_values(self):
+        last_token = None
         for token in self.tokens:
             if token.terminal is "opcode":
                 yield str(token).ljust(8)
+            elif token.is_operand and last_token.is_operand:
+                yield ", "
+                yield str(token)
             else:
                 yield str(token)
+            last_token = token
 
     def get_matching_command(self, opcode):
         for command in self.commands:

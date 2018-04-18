@@ -7,6 +7,7 @@ def token(terminal, value=None):
 
 class Token:
     terminal = None
+    is_operand = False
 
     def __init__(self, value=None):
         self.value = value
@@ -18,15 +19,19 @@ class Token:
         return "Token <{} {}>".format(self.terminal, self.value)
 
 
+class OperandMixin:
+    is_operand = True
+
+
 class OpcodeToken(Token):
     terminal = "opcode"
 
 
-class Addr11Token(Token):
+class Addr11Token(OperandMixin, Token):
     terminal = "addr11"
 
 
-class Addr16Token(Token):
+class Addr16Token(OperandMixin, Token):
     terminal = "addr16"
 
 
@@ -37,20 +42,20 @@ class EndOfInstrToken(Token):
         return "\n"
 
 
-class RegisterToken(Token):
+class RegisterToken(OperandMixin, Token):
     terminal = "register"
 
     def __str__(self):
         return "r{}".format(self.value)
 
 
-class BitToken(Token):
+class BitToken(OperandMixin, Token):
     terminal = "bit"
 
 
-class OffsetToken(Token):
+class OffsetToken(OperandMixin, Token):
     terminal = "offset"
 
 
-class SFRToken(Token):
+class SFRToken(OperandMixin, Token):
     terminal = "sfr"
