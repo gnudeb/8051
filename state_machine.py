@@ -33,6 +33,7 @@ _commands = [
     Command("00010101", "dec", "direct"),
     Command("0001011.", "dec", "indirect"),
     Command("00011...", "dec", "register"),
+    Command("00100000", "jb", "bit", "offset")
 ]
 
 
@@ -72,6 +73,10 @@ class Intel8051StateMachine:
         elif operand == "a":
             terminal = "sfr"
             value = "a"
+        elif operand == "bit":
+            value = self.next_byte()
+        elif operand == "offset":
+            value = self.next_byte()
         else:
             raise Exception("Unknown operand {}".format(operand))
         self.tokens.append(token(terminal, value))

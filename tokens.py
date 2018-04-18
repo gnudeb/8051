@@ -44,5 +44,13 @@ class RegisterToken(Token):
         return "r{}".format(self.value)
 
 
+class BitToken(Token):
+    terminal = "bit"
+
+
+class OffsetToken(Token):
+    terminal = "offset"
+
+
 class SFRToken(Token):
     terminal = "sfr"
