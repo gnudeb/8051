@@ -4,6 +4,10 @@ import re
 from tokens import token
 
 
+class ByteSourceExhausted(Exception):
+    pass
+
+
 class Command:
     def __init__(self, bit_pattern, mnemonic, *operands):
         self.bit_pattern = bit_pattern
@@ -46,24 +50,51 @@ class Intel8051StateMachine:
         self.byte_source = iter(byte_source)
         self.commands = commands
         self.tokens = []
+        self.pending_tokens = []
+        self.leftover_bytes = []
         self.program_counter = 0
 
     def next_byte(self):
         self.program_counter += 1
-        return next(self.byte_source)
+        try:
+            byte = next(self.byte_source)
+            self.leftover_bytes.append(byte)
+            return byte
+        except StopIteration:
+            raise ByteSourceExhausted
+
+    def consume_byte_source(self):
+        while True:
+            try:
+                self.consume_command()
+            except ByteSourceExhausted:
+                if self.pending_tokens:
+                    address_token = self.pending_tokens[0]
+                    assert address_token.terminal is "address"
+                    self.tokens.append(address_token)
+
+                    for byte in self.leftover_bytes:
+                        self.tokens.append(token("raw_byte", byte))
+
+                    self.pending_tokens = []
+                    self.leftover_bytes = []
+
+                break
 
     def consume_command(self):
-
-        self.tokens.append(token("address", self.program_counter))
-
         opcode = self.current_opcode = self.next_byte()
         command = self.get_matching_command(opcode)
-        self.tokens.append(token("opcode", command.mnemonic))
+
+        self.pending_tokens.append(token("address", self.program_counter))
+        self.pending_tokens.append(token("opcode", command.mnemonic))
 
         for operand in command.operands:
             self.consume_operand(operand)
 
-        self.tokens.append(token("eoi"))
+        self.pending_tokens.append(token("eoi"))
+        self.tokens.extend(self.pending_tokens)
+        self.pending_tokens = []
+        self.leftover_bytes = []
 
     def consume_operand(self, operand):
         terminal = operand
@@ -90,7 +121,7 @@ class Intel8051StateMachine:
             value = self.next_byte()
         else:
             raise Exception("Unknown operand {}".format(operand))
-        self.tokens.append(token(terminal, value))
+        self.pending_tokens.append(token(terminal, value))
 
     def listing(self):
         return ''.join(self.iterate_token_values())

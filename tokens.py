@@ -8,6 +8,7 @@ def token(terminal, value=None):
 class Token:
     terminal = None
     is_operand = False
+    is_helper = False
 
     def __init__(self, value=None):
         self.value = value
@@ -23,6 +24,10 @@ class OperandMixin:
     is_operand = True
 
 
+class HelperMixin:
+    is_helper = True
+
+
 class OpcodeToken(Token):
     terminal = "opcode"
 
@@ -35,7 +40,7 @@ class Addr16Token(OperandMixin, Token):
     terminal = "addr16"
 
 
-class EndOfInstrToken(Token):
+class EndOfInstrToken(HelperMixin, Token):
     terminal = "eoi"
 
     def __str__(self):
@@ -68,7 +73,7 @@ class SFRToken(OperandMixin, Token):
     terminal = "sfr"
 
 
-class AddressToken(Token):
+class AddressToken(HelperMixin, Token):
     terminal = "address"
 
     def __str__(self):
@@ -80,3 +85,10 @@ class ImmediateToken(OperandMixin, Token):
 
     def __str__(self):
         return "#{}".format(self.value)
+
+
+class RawByteToken(Token):
+    terminal = "raw_byte"
+
+    def __str__(self):
+        return "{:#04x}".format(self.value)
