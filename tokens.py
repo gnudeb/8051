@@ -14,6 +14,9 @@ class Token:
     def __str__(self):
         return str(self.value)
 
+    def __repr__(self):
+        return "Token <{} {}>".format(self.terminal, self.value)
+
 
 class OpcodeToken(Token):
     terminal = "opcode"
@@ -41,5 +44,5 @@ class RegisterToken(Token):
         return "r{}".format(self.value)
 
 
-class AccumulatorToken(Token):
-    terminal = "a"
+class SFRToken(Token):
+    terminal = "sfr"

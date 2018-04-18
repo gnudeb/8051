@@ -29,6 +29,10 @@ _commands = [
     Command("...10001", "acall", "addr11"),
     Command("...10010", "lcall", "addr16"),
     Command("00010011", "rrc", "a"),
+    Command("00010100", "dec", "a"),
+    Command("00010101", "dec", "direct"),
+    Command("0001011.", "dec", "indirect"),
+    Command("00011...", "dec", "register"),
 ]
 
 
@@ -53,6 +57,7 @@ class Intel8051StateMachine:
         self.tokens.append(token("eoi"))
 
     def consume_operand(self, operand):
+        terminal = operand
         if operand == "addr11":
             address = (self.current_opcode & 0b11100000) << 3
             address += self.next_byte()
@@ -65,10 +70,11 @@ class Intel8051StateMachine:
             register = self.current_opcode & 0b00000111
             value = register
         elif operand == "a":
+            terminal = "sfr"
             value = "a"
         else:
             raise Exception("Unknown operand {}".format(operand))
-        self.tokens.append(token(operand, value))
+        self.tokens.append(token(terminal, value))
 
     def listing(self):
         return ''.join(self.iterate_token_values())
