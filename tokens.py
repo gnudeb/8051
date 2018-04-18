@@ -56,7 +56,7 @@ class BitToken(OperandMixin, Token):
         if self.value < 128:
             byte = 0x20 + (self.value // 8)
             bit = self.value % 8
-            return "0x{:x}.{}".format(byte, bit)
+            return "{:#x}.{}".format(byte, bit)
 
 
 class OffsetToken(OperandMixin, Token):
@@ -71,4 +71,11 @@ class AddressToken(Token):
     terminal = "address"
 
     def __str__(self):
-        return hex(self.value)
+        return "{:04x}".format(self.value)
+
+
+class ImmediateToken(OperandMixin, Token):
+    terminal = "immediate"
+
+    def __str__(self):
+        return "#{}".format(self.value)

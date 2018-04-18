@@ -36,6 +36,7 @@ _commands = [
     Command("00100000", "jb", "bit", "offset"),
     Command("00100010", "ret"),
     Command("00100011", "rl", "a"),
+    Command("00100100", "add", "a", "imm8")
 ]
 
 
@@ -83,6 +84,9 @@ class Intel8051StateMachine:
         elif operand == "bit":
             value = self.next_byte()
         elif operand == "offset":
+            value = self.next_byte()
+        elif operand == "imm8":
+            terminal = "immediate"
             value = self.next_byte()
         else:
             raise Exception("Unknown operand {}".format(operand))
