@@ -65,3 +65,10 @@ class OffsetToken(OperandMixin, Token):
 
 class SFRToken(OperandMixin, Token):
     terminal = "sfr"
+
+
+class AddressToken(Token):
+    terminal = "address"
+
+    def __str__(self):
+        return hex(self.value)

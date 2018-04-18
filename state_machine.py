@@ -33,7 +33,9 @@ _commands = [
     Command("00010101", "dec", "direct"),
     Command("0001011.", "dec", "indirect"),
     Command("00011...", "dec", "register"),
-    Command("00100000", "jb", "bit", "offset")
+    Command("00100000", "jb", "bit", "offset"),
+    Command("00100010", "ret"),
+    Command("00100011", "rl", "a"),
 ]
 
 
@@ -43,11 +45,16 @@ class Intel8051StateMachine:
         self.byte_source = iter(byte_source)
         self.commands = commands
         self.tokens = []
+        self.program_counter = 0
 
     def next_byte(self):
+        self.program_counter += 1
         return next(self.byte_source)
 
     def consume_command(self):
+
+        self.tokens.append(token("address", self.program_counter))
+
         opcode = self.current_opcode = self.next_byte()
         command = self.get_matching_command(opcode)
         self.tokens.append(token("opcode", command.mnemonic))
@@ -87,7 +94,7 @@ class Intel8051StateMachine:
     def iterate_token_values(self):
         last_token = None
         for token in self.tokens:
-            if token.terminal is "opcode":
+            if token.terminal in ["opcode", "address"]:
                 yield str(token).ljust(8)
             elif token.is_operand and last_token.is_operand:
                 yield ", "
