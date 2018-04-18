@@ -52,6 +52,12 @@ class RegisterToken(OperandMixin, Token):
 class BitToken(OperandMixin, Token):
     terminal = "bit"
 
+    def __str__(self):
+        if self.value < 128:
+            byte = 0x20 + (self.value // 8)
+            bit = self.value % 8
+            return "0x{:x}.{}".format(byte, bit)
+
 
 class OffsetToken(OperandMixin, Token):
     terminal = "offset"
