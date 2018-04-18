@@ -57,6 +57,7 @@ class BitToken(OperandMixin, Token):
             byte = 0x20 + (self.value // 8)
             bit = self.value % 8
             return "{:#x}.{}".format(byte, bit)
+        raise NotImplementedError("Bit values above 127 not implemented")
 
 
 class OffsetToken(OperandMixin, Token):
