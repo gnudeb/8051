@@ -40,7 +40,8 @@ _commands = [
     Command("00100000", "jb", "bit", "offset"),
     Command("00100010", "ret"),
     Command("00100011", "rl", "a"),
-    Command("00100100", "add", "a", "imm8")
+    Command("00100100", "add", "a", "imm8"),
+    Command("0010011.", "add", "a", "indirect")
 ]
 
 
@@ -119,6 +120,8 @@ class Intel8051StateMachine:
         elif operand == "imm8":
             terminal = "immediate"
             value = self.next_byte()
+        elif operand == "indirect":
+            value = self.current_opcode & 0b00000001
         else:
             raise Exception("Unknown operand {}".format(operand))
         self.pending_tokens.append(token(terminal, value))

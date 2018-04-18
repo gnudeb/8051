@@ -92,3 +92,10 @@ class RawByteToken(Token):
 
     def __str__(self):
         return "{:#04x}".format(self.value)
+
+
+class IndirectToken(Token):
+    terminal = "indirect"
+
+    def __str__(self):
+        return "@r{}".format(self.value)
