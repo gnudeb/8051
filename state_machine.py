@@ -84,7 +84,7 @@ class Intel8051StateMachine:
         self.tokens = []
         self.pending_tokens = []
         self.leftover_bytes = []
-        self.program_counter = 0
+        self.program_counter = -1
 
     def next_byte(self):
         self.program_counter += 1
